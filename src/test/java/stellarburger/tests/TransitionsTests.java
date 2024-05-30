@@ -11,35 +11,34 @@ import stellarburger.pom.MainPageAuthorized;
 import stellarburger.pom.MainPageUnauthorized;
 import stellarburger.tests.utils.UtilMethods;
 
-import static com.codeborne.selenide.Selenide.closeWindow;
-import static com.codeborne.selenide.Selenide.executeJavaScript;
-
 import static org.hamcrest.CoreMatchers.is;
 
 @Epic("Tests transitions between pages using buttons")
-class TransitionsTests {
+class TransitionsTests extends BaseTest {
+
+    private static User user;
 
     private static String refreshToken;
     private static String accessToken;
 
     @BeforeAll
     static void register() {
-        User user = UtilMethods.getFakeUser();
+        user = UtilMethods.getFakeUser();
         MainPageUnauthorized mainPage = new MainPageUnauthorized().openPage();
         LoginPage loginPage = mainPage.register(user);
         loginPage.load();
         MainPageAuthorized mainPageAuthorized = loginPage.login(user);
         mainPageAuthorized.load();
 
-        refreshToken = executeJavaScript("return localStorage.getItem('refreshToken');");
-        accessToken = executeJavaScript("return localStorage.getItem('accessToken');");
+        refreshToken = UtilMethods.getRefreshTokenFromLocalStorage();
+        accessToken = UtilMethods.getAccessTokenFromLocalStorage();
     }
 
     @BeforeEach
     void setTokens() {
-        executeJavaScript("localStorage.clear();");
-        executeJavaScript(String.format("localStorage.setItem('%s', '%s')", "refreshToken", refreshToken));
-        executeJavaScript(String.format("localStorage.setItem('%s', '%s')", "accessToken", accessToken));
+        UtilMethods.clearLocalStorage();
+        UtilMethods.setAccessTokenInLocalStorage(accessToken);
+        UtilMethods.setRefreshTokenInLocalStorage(refreshToken);
     }
 
     @Test
@@ -98,7 +97,12 @@ class TransitionsTests {
 
     @AfterAll
     static void clearLocalStorageAfterAll() {
-        executeJavaScript("localStorage.clear();");
+        UtilMethods.clearLocalStorage();
+    }
+
+    @AfterAll
+    static void deleteUser() {
+        UtilMethods.deleteUser(user);
     }
 
 }

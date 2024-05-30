@@ -2,8 +2,9 @@ package stellarburger.tests;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
+import io.restassured.response.Response;
 import org.hamcrest.MatcherAssert;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -18,19 +19,22 @@ import java.util.Random;
 
 import static com.codeborne.selenide.Selenide.*;
 import static org.hamcrest.CoreMatchers.is;
+import static stellarburger.tests.utils.UtilMethods.deleteUser;
 
 @Epic("Tests for register functionality")
-class RegistrationTests  {
+class RegistrationTests extends BaseTest {
+
+    private User user;
 
     @ParameterizedTest
-    @ValueSource(ints = {6, 7, 10, 15})
+    @ValueSource(ints = {6, 10, 7, 15})
     @DisplayName("Positive tests for user register")
     @Description("Tests that can register with the correct password length (greater than 5)")
     void shouldRegisterPasswordLengthGreaterThanFive(int passwordLength) {
         int emailLength = new Random().nextInt(6) + 5;
         int nameLength = new Random().nextInt(6) + 5;
 
-        User user = UtilMethods.getFakeUser(nameLength, emailLength, passwordLength);
+        user = UtilMethods.getFakeUser(nameLength, emailLength, passwordLength);
 
         MainPageUnauthorized mainPage = new MainPageUnauthorized().openPage();
         mainPage.load();
@@ -38,18 +42,21 @@ class RegistrationTests  {
         LoginPage loginPage = mainPage.register(user);
         loginPage.load();
         MatcherAssert.assertThat(loginPage.isLoaded(), is(true));
+        deleteUser(user);
     }
+
+
 
     @ParameterizedTest
     @ValueSource(ints = {5, 4, 1, 2})
     @DisplayName("Negative tests for user register")
     @Description("Tests that can't register with the bad password length (less than 6)," +
             "Also check error message")
-    void shouldNotRegister(int passwordLength) {
+    void shouldNotRegisterPasswordLengthLesserThanSix(int passwordLength) {
         int emailLength = new Random().nextInt(6) + 5;
         int nameLength = new Random().nextInt(6) + 5;
 
-        User user = UtilMethods.getFakeUser(nameLength, emailLength, passwordLength);
+        user = UtilMethods.getFakeUser(nameLength, emailLength, passwordLength);
 
         MainPageUnauthorized mainPage = new MainPageUnauthorized().openPage();
         mainPage.load();
@@ -68,12 +75,12 @@ class RegistrationTests  {
 
         registerPage.setEmail(user.getEmail());
         registerPage.getRegisterButton().click();
-        MatcherAssert.assertThat(page(LoginPage.class).isLoaded(), is(false));
-    }
-
-    @AfterAll
-    static void clearLocalStorageAfterAll() {
-        executeJavaScript("localStorage.clear();");
+        try {
+            MatcherAssert.assertThat(page(LoginPage.class).isLoaded(), is(false));
+        } catch (AssertionError e) {
+            deleteUser(user);
+            throw e;
+        }
     }
 
 

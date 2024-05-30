@@ -1,7 +1,9 @@
 package stellarburger.tests;
 
+import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
+import io.qameta.allure.Step;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,12 +13,11 @@ import stellarburger.pom.MainPageUnauthorized;
 import static com.codeborne.selenide.Condition.attributeMatching;
 import static org.hamcrest.CoreMatchers.containsString;
 
-
 import static com.codeborne.selenide.Selectors.byXpath;
 import static com.codeborne.selenide.Selenide.$;
 
 @Epic("Tests transitions on burger constructor panel")
-class ConstructorPanelTests {
+class ConstructorPanelTests extends BaseTest {
 
     public enum IngredientType {
         BUN("Булки"),
@@ -50,6 +51,7 @@ class ConstructorPanelTests {
             case BUN:
                 mainPageUnauthorized.clickSauceButton();
                 mainPageUnauthorized.load();
+                $(byXpath(xPath)).shouldNotHave(attributeMatching("class", ".*current.*"));
                 mainPageUnauthorized.clickBunButton();
                 break;
             case FILLING:
@@ -60,12 +62,18 @@ class ConstructorPanelTests {
                 break;
         }
 
-        $(byXpath(xPath)).shouldHave(attributeMatching("class", ".*current.*"));
-        String cssClass = $(byXpath(xPath)).getAttribute("class");
-        MatcherAssert.assertThat(cssClass, containsString("current"));
+        SelenideElement selectedIngredientType = $(byXpath(xPath));
+
+        isElementSelected(selectedIngredientType);
 
     }
 
+    @Step("Check that ingredient type selected")
+    private void isElementSelected(SelenideElement selectedIngredientType) {
+        selectedIngredientType.shouldHave(attributeMatching("class", ".*current.*"));
+        String cssClass = selectedIngredientType.getAttribute("class");
+        MatcherAssert.assertThat(cssClass, containsString("current"));
+    }
 
 }
 

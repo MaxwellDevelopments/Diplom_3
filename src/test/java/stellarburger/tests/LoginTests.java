@@ -12,7 +12,7 @@ import static com.codeborne.selenide.Selenide.executeJavaScript;
 import static org.hamcrest.CoreMatchers.is;
 
 @Epic("Login functionality tests")
-class LoginTests {
+class LoginTests extends BaseTest {
     static User user;
 
     @BeforeAll
@@ -95,8 +95,12 @@ class LoginTests {
 
     @AfterAll
     static void clearLocalStorageAfterAll() {
-        executeJavaScript("localStorage.clear();");
+        UtilMethods.clearLocalStorage();
     }
 
+    @AfterAll
+    static void deleteUser() {
+        UtilMethods.deleteUser(user);
+    }
 
 }
