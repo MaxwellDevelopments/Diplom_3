@@ -7,6 +7,7 @@ import io.restassured.RestAssured;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import stellarburger.tests.utils.Constants;
 
@@ -14,7 +15,8 @@ class BaseTest {
 
     private enum Browser {
         FIREFOX,
-        CHROME
+        CHROME,
+        YANDEX
     }
 
     @BeforeAll
@@ -32,8 +34,19 @@ class BaseTest {
             case CHROME:
                 initChrome();
                 break;
+            case YANDEX:
+                initYandex();
+                break;
         }
 
+    }
+
+    private static void initYandex() {
+        WebDriverManager.chromedriver().driverVersion(System.getProperty("driver.version")).setup();
+        var opts = new ChromeOptions();
+        opts.setBinary(System.getProperty("browser.application"));
+        var driver = new ChromeDriver(opts);
+        WebDriverRunner.setWebDriver(driver);
     }
 
     private static void initChrome() {
