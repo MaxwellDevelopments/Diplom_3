@@ -2,9 +2,9 @@ package stellarburger.tests;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
-import io.restassured.response.Response;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -19,12 +19,19 @@ import java.util.Random;
 
 import static com.codeborne.selenide.Selenide.*;
 import static org.hamcrest.CoreMatchers.is;
-import static stellarburger.tests.utils.UtilMethods.deleteUser;
 
 @Epic("Tests for register functionality")
 class RegistrationTests extends BaseTest {
 
     private User user;
+
+    @BeforeEach
+    void clearLocalStorage() {
+        MainPageUnauthorized mainPage = new MainPageUnauthorized().openPage();
+        mainPage.load();
+
+        UtilMethods.clearLocalStorage();
+    }
 
     @ParameterizedTest
     @ValueSource(ints = {6, 10, 7, 15})
@@ -42,10 +49,7 @@ class RegistrationTests extends BaseTest {
         LoginPage loginPage = mainPage.register(user);
         loginPage.load();
         MatcherAssert.assertThat(loginPage.isLoaded(), is(true));
-        deleteUser(user);
     }
-
-
 
     @ParameterizedTest
     @ValueSource(ints = {5, 4, 1, 2})
@@ -75,12 +79,22 @@ class RegistrationTests extends BaseTest {
 
         registerPage.setEmail(user.getEmail());
         registerPage.getRegisterButton().click();
-        try {
-            MatcherAssert.assertThat(page(LoginPage.class).isLoaded(), is(false));
-        } catch (AssertionError e) {
-            deleteUser(user);
-            throw e;
+
+        MatcherAssert.assertThat(page(LoginPage.class).isLoaded(), is(false));
+    }
+
+    @AfterEach
+    void deleteUser() {
+        MainPageUnauthorized mainPage = new MainPageUnauthorized().openPage();
+        mainPage.load();
+
+        mainPage.login(user);
+        String accessToken = UtilMethods.getAccessTokenFromLocalStorage();
+
+        if (accessToken != null) {
+            UtilMethods.deleteUser(user);
         }
+
     }
 
 

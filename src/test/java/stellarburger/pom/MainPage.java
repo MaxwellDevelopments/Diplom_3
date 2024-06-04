@@ -2,14 +2,10 @@ package stellarburger.pom;
 
 import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Step;
-import org.hamcrest.MatcherAssert;
-import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.How;
 
 import static com.codeborne.selenide.Condition.attributeMatching;
 import static com.codeborne.selenide.Selectors.byXpath;
 import static com.codeborne.selenide.Selenide.$;
-import static org.hamcrest.CoreMatchers.containsString;
 
 
 public abstract class MainPage extends BasePage implements Page {
