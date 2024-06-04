@@ -1,78 +1,31 @@
 package stellarburger.tests;
 
-import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
-import io.qameta.allure.Step;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import stellarburger.pom.MainPage.IngredientType;
 import stellarburger.pom.MainPageUnauthorized;
 
-import static com.codeborne.selenide.Condition.attributeMatching;
-import static org.hamcrest.CoreMatchers.containsString;
-
-import static com.codeborne.selenide.Selectors.byXpath;
-import static com.codeborne.selenide.Selenide.$;
+import static org.hamcrest.CoreMatchers.is;
 
 @Epic("Tests transitions on burger constructor panel")
 class ConstructorPanelTests extends BaseTest {
-
-    public enum IngredientType {
-        BUN("Булки"),
-        FILLING("Начинки"),
-        SAUCE("Соусы");
-
-        private final String name;
-
-        IngredientType(String value) {
-            this.name = value;
-        }
-
-        public String toString() {
-            return this.name;
-        }
-    }
     
     @ParameterizedTest
     @EnumSource(IngredientType.class)
     @DisplayName("Transitions in the constructor burger panel between ingredient types")
     @Description("Tests that the tabs will change when clicked according to the button")
     void shouldChangeIngredientsInConstructorTest(IngredientType ingredientType) {
-        String xPath = String.format("//span[text()='%s']/..", ingredientType);
         MainPageUnauthorized mainPageUnauthorized = new MainPageUnauthorized().openPage();
         mainPageUnauthorized.load();
 
-        switch (ingredientType) {
-            // У булочки особый случай. На кнопки нельзя тыкать, если они уже выбраны
-            // иначе вылетает исключение.
-            // поэтому в начале приходится тыкнуть на какую-то другую кнопку.
-            case BUN:
-                mainPageUnauthorized.clickSauceButton();
-                mainPageUnauthorized.load();
-                $(byXpath(xPath)).shouldNotHave(attributeMatching("class", ".*current.*"));
-                mainPageUnauthorized.clickBunButton();
-                break;
-            case FILLING:
-                mainPageUnauthorized.clickFillingButton();
-                break;
-            case SAUCE:
-                mainPageUnauthorized.clickSauceButton();
-                break;
-        }
+        mainPageUnauthorized.clickOnSpecificIngredientButton(ingredientType);
+        boolean actual = mainPageUnauthorized.isIngredientSelected(ingredientType);
 
-        SelenideElement selectedIngredientType = $(byXpath(xPath));
-
-        isElementSelected(selectedIngredientType);
-
-    }
-
-    @Step("Check that ingredient type selected")
-    private void isElementSelected(SelenideElement selectedIngredientType) {
-        selectedIngredientType.shouldHave(attributeMatching("class", ".*current.*"));
-        String cssClass = selectedIngredientType.getAttribute("class");
-        MatcherAssert.assertThat(cssClass, containsString("current"));
+        MatcherAssert.assertThat(actual, is(true));
     }
 
 }

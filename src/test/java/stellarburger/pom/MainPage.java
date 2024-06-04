@@ -2,11 +2,33 @@ package stellarburger.pom;
 
 import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Step;
+import org.hamcrest.MatcherAssert;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.How;
 
+import static com.codeborne.selenide.Condition.attributeMatching;
+import static com.codeborne.selenide.Selectors.byXpath;
+import static com.codeborne.selenide.Selenide.$;
+import static org.hamcrest.CoreMatchers.containsString;
+
 
 public abstract class MainPage extends BasePage implements Page {
+
+    public enum IngredientType {
+        BUN("Булки"),
+        FILLING("Начинки"),
+        SAUCE("Соусы");
+
+        private final String name;
+
+        IngredientType(String value) {
+            this.name = value;
+        }
+
+        public String toString() {
+            return this.name;
+        }
+    }
 
     @Override
     public abstract void load();
@@ -17,26 +39,28 @@ public abstract class MainPage extends BasePage implements Page {
     @Step("Open main page")
     public abstract MainPage openPage();
 
-    @FindBy(how = How.XPATH, using = "//span[text()='Булки']/..")
-    public SelenideElement bunButton;
-
-    @FindBy(how = How.XPATH, using = "//span[text()='Соусы']/..")
-    public SelenideElement sauceButton;
-
-    @FindBy(how = How.XPATH, using = "//span[text()='Начинки']/..")
-    public SelenideElement fillingButton;
-
-    @Step("Click on bun button on constructor panel")
-    public void clickBunButton() {
-        bunButton.click();
+    @Step("Click on ingredient on constructor panel")
+    public void clickOnSpecificIngredientButton(IngredientType ingredientType) {
+        String xPath = getIngredientXpath(ingredientType);
+        clickOnElement($(byXpath(xPath)));
     }
-    @Step("Click on sauce button on constructor panel")
-    public void clickSauceButton() {
-        sauceButton.click();
+
+    @Step("Check that ingredient type selected")
+    public boolean isIngredientSelected(IngredientType ingredientType) {
+        String xPath = getIngredientXpath(ingredientType);
+        SelenideElement selectedIngredientType = $(byXpath(xPath));
+        selectedIngredientType.shouldHave(attributeMatching("class", ".*current.*"));
+        String cssClass = selectedIngredientType.getAttribute("class");
+        if (cssClass == null) {
+            return false;
+        }
+        else {
+            return cssClass.contains("current");
+        }
     }
-    @Step("Click on filling button on constructor panel")
-    public void clickFillingButton() {
-        fillingButton.click();
+
+    private String getIngredientXpath(IngredientType ingredientType) {
+        return String.format("//span[text()='%s']/..", ingredientType);
     }
 
 }

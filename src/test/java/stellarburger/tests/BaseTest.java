@@ -42,9 +42,11 @@ class BaseTest {
     }
 
     private static void initYandex() {
-        WebDriverManager.chromedriver().driverVersion("driver.version").setup();
+        System.setProperty("driver.version", "122.0.6261.128");
+        System.setProperty("browser.location", "C:\\Users\\Maxwell\\AppData\\Local\\Yandex\\YandexBrowser\\Application\\browser.exe");
+        WebDriverManager.chromedriver().driverVersion(System.getProperty("driver.version")).setup();
         var opts = new ChromeOptions();
-        opts.setBinary("application.location");
+        opts.setBinary(System.getProperty("browser.location"));
         var driver = new ChromeDriver(opts);
         WebDriverRunner.setWebDriver(driver);
     }
