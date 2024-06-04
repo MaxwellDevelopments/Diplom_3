@@ -8,15 +8,14 @@ import stellarburger.business.User;
 import stellarburger.pom.*;
 import stellarburger.tests.utils.UtilMethods;
 
-import static com.codeborne.selenide.Selenide.executeJavaScript;
 import static org.hamcrest.CoreMatchers.is;
 
 @Epic("Login functionality tests")
 class LoginTests extends BaseTest {
-    static User user;
+    User user;
 
-    @BeforeAll
-    static void register() {
+    @BeforeEach
+    void register() {
         user = UtilMethods.getFakeUser();
         MainPageUnauthorized mainPage = new MainPageUnauthorized().openPage();
         mainPage.register(user);
@@ -24,7 +23,7 @@ class LoginTests extends BaseTest {
 
     @BeforeEach
     void clearLocalStorageBefore() {
-        executeJavaScript("localStorage.clear();");
+        UtilMethods.clearLocalStorage();
     }
 
     @Test
@@ -98,8 +97,8 @@ class LoginTests extends BaseTest {
         UtilMethods.clearLocalStorage();
     }
 
-    @AfterAll
-    static void deleteUser() {
+    @AfterEach
+    void deleteUser() {
         UtilMethods.deleteUser(user);
     }
 
