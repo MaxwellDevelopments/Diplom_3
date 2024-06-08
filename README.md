@@ -1,4 +1,4 @@
-# Diplom_3
-## UI-testing
+# Diplom_3  UI-testing
+## Krasilnikov Sergei Igorevich
 
-allure, selenide, junit5
+java11, allure, selenide, junit5
